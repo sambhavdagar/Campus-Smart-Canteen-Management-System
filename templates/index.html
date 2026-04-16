@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Canteen Menu</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { border-collapse: collapse; width: 50%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        button { padding: 10px 15px; background-color: #28a745; color: white; border: none; cursor: pointer; }
+        button:hover { background-color: #218838; }
+    </style>
+</head>
+<body>
+
+    <h1>Campus Smart Canteen</h1>
+    
+    <h2>Current Menu</h2>
+    <table id="menu-table">
+        <thead>
+            <tr>
+                <th>Item ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price (₹)</th>
+            </tr>
+        </thead>
+        <tbody>
+            </tbody>
+    </table>
+
+    <button onclick="placeSampleOrder()">Place Sample Order (Mayank)</button>
+    <p id="order-status"></p>
+
+    <script>
+        // Load menu items from backend
+        fetch('/menu')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.querySelector('#menu-table tbody');
+                data.forEach(item => {
+                    const row = `<tr>
+                        <td>${item.item_id}</td>
+                        <td>${item.item_name}</td>
+                        <td>${item.category}</td>
+                        <td>${item.price}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            });
+
+        // Demo placing an order using the stored procedures
+        function placeSampleOrder() {
+            const orderData = {
+                customer_id: 3, // Mayank
+                items: [
+                    { item_id: 1, qty: 1 }, // 1 Veg Sandwich
+                    { item_id: 3, qty: 2 }  // 2 Cold Coffees
+                ]
+            };
+
+            fetch('/place_order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.error) {
+                    document.getElementById('order-status').innerText = "Error: " + data.error;
+                } else {
+                    document.getElementById('order-status').innerText = 
+                        `${data.message} Order ID: ${data.order_id}, Total Bill: ₹${data.total_bill}`;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
